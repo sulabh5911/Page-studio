@@ -1,0 +1,10 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "env": {
+    "CONTENTFUL_SPACE_ID": "@contentful_space_id",
+    "CONTENTFUL_DELIVERY_TOKEN": "@contentful_delivery_token",
+    "CONTENTFUL_PREVIEW_TOKEN": "@contentful_preview_token"
+  }
+}

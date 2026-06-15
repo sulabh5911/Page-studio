@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+
+    - run: npm ci
+
+    - name: Type Check
+      run: npx tsc --noEmit
+
+    - name: Lint
+      run: npm run lint
+
+    - name: Unit Tests
+      run: npm run test:run
+
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps
+
+    - name: E2E and A11y Tests
+      run: npm run test:e2e
+
+    - name: Upload a11y report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: a11y-report
+        path: a11y-report/a11y-report.json
+
+    - name: Fail on critical a11y violations
+      if: always()
+      run: |
+        if [ -f a11y-report/a11y-report.json ]; then
+          node -e "const r=require('./a11y-report/a11y-report.json'); if(r.criticalViolations>0){console.error('Critical a11y violations:',r.criticalViolations); process.exit(1)}"
+        else
+          echo 'No a11y report generated'
+          exit 1
+        fi
+
+    - name: Build
+      run: npm run build
